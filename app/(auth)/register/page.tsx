@@ -14,7 +14,7 @@ export default function RegisterPage() {
   return (
     <Card style={{ padding: "2rem" }}>
       <form action={action} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        
+
         {state?.message && (
           <div style={{ padding: "12px", background: "rgba(239, 68, 68, 0.1)", color: "var(--danger)", borderRadius: "8px", fontSize: "0.875rem", textAlign: "center" }}>
             {state.message}
@@ -25,7 +25,7 @@ export default function RegisterPage() {
           label="Nome Completo"
           name="name"
           type="text"
-          placeholder="João da Silva"
+          placeholder="Seu Nome"
           leftIcon={<User size={16} />}
           error={state?.errors?.name?.[0]}
         />
