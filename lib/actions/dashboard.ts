@@ -18,8 +18,8 @@ export async function getDashboardData() {
   const [studyMins] = await db().select({ m: sum(studySessions.durationSeconds) }).from(studySessions).where(eq(studySessions.userId, session.userId));
   const [flashcardsCount] = await db().select({ c: count() }).from(flashcardReviews).where(eq(flashcardReviews.userId, session.userId));
 
-  const totalQuestions = questionsCount.c || 0;
-  const correctQuestions = correctCount.c || 0;
+  const totalQuestions = Number(questionsCount.c) || 0;
+  const correctQuestions = Number(correctCount.c) || 0;
   const accuracy = totalQuestions > 0 ? Math.round((correctQuestions / totalQuestions) * 100) : 0;
   const totalMinutes = Math.floor((Number(studyMins.m) || 0) / 60);
 
@@ -33,7 +33,7 @@ export async function getDashboardData() {
 
   const simulados = await getSimulados();
 
-  const flashcardsCountVal = flashcardsCount.c || 0;
+  const flashcardsCountVal = Number(flashcardsCount.c) || 0;
   
   return {
     totalQuestions,

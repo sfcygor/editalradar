@@ -76,8 +76,8 @@ export async function getEvolutionData() {
 
   const rows = await db()
     .select({
-      monthStr: sql<string>`strftime('%m', ${questionAttempts.attemptedAt} / 1000, 'unixepoch')`,
-      yearStr: sql<string>`strftime('%Y', ${questionAttempts.attemptedAt} / 1000, 'unixepoch')`,
+      monthStr: sql<string>`TO_CHAR(${questionAttempts.attemptedAt}, 'MM')`,
+      yearStr: sql<string>`TO_CHAR(${questionAttempts.attemptedAt}, 'YYYY')`,
       total: sql<number>`COUNT(*)`,
       correct: sql<number>`SUM(CASE WHEN ${questionAttempts.isCorrect} THEN 1 ELSE 0 END)`,
     })
@@ -89,12 +89,12 @@ export async function getEvolutionData() {
       )
     )
     .groupBy(
-      sql`strftime('%Y', ${questionAttempts.attemptedAt} / 1000, 'unixepoch')`,
-      sql`strftime('%m', ${questionAttempts.attemptedAt} / 1000, 'unixepoch')`
+      sql`TO_CHAR(${questionAttempts.attemptedAt}, 'YYYY')`,
+      sql`TO_CHAR(${questionAttempts.attemptedAt}, 'MM')`
     )
     .orderBy(
-      sql`strftime('%Y', ${questionAttempts.attemptedAt} / 1000, 'unixepoch')`,
-      sql`strftime('%m', ${questionAttempts.attemptedAt} / 1000, 'unixepoch')`
+      sql`TO_CHAR(${questionAttempts.attemptedAt}, 'YYYY')`,
+      sql`TO_CHAR(${questionAttempts.attemptedAt}, 'MM')`
     );
 
   const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
