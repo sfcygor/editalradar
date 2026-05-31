@@ -133,7 +133,7 @@ export default function DeckCardsClient({ deck, initialCards }: { deck: any; ini
               />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 8 }}>
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancelar</Button>
+              <Button type="button" variant="secondary" onClick={() => setIsEditOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Salvando..." : "Salvar"}</Button>
             </div>
           </form>

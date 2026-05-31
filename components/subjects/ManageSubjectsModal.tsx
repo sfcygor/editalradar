@@ -139,7 +139,7 @@ export default function ManageSubjectsModal({
               <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ex: Informática" autoFocus />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 16 }}>
-              <Button type="button" variant="outline" onClick={goBack} disabled={isSubmitting}>Cancelar</Button>
+              <Button type="button" variant="secondary" onClick={goBack} disabled={isSubmitting}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting}>Criar</Button>
             </div>
           </form>
@@ -161,7 +161,7 @@ export default function ManageSubjectsModal({
               <Input value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 16 }}>
-              <Button type="button" variant="outline" onClick={goBack} disabled={isSubmitting}>Cancelar</Button>
+              <Button type="button" variant="secondary" onClick={goBack} disabled={isSubmitting}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting}>Salvar Alterações</Button>
             </div>
           </form>
@@ -182,7 +182,7 @@ export default function ManageSubjectsModal({
               Nota: As questões e flashcards associados não serão excluídos, mas ficarão órfãos de matéria.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 16 }}>
-              <Button type="button" variant="outline" onClick={goBack} disabled={isSubmitting}>Cancelar</Button>
+              <Button type="button" variant="secondary" onClick={goBack} disabled={isSubmitting}>Cancelar</Button>
               <Button type="button" variant="danger" onClick={handleDelete} disabled={isSubmitting}>Excluir Matéria</Button>
             </div>
           </div>

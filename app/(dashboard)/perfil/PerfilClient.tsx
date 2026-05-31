@@ -280,7 +280,7 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
           Tem certeza que deseja zerar todas as suas estatísticas? Todo o seu histórico de acertos, erros, sequências e revisões será perdido <strong>permanentemente</strong>.
         </p>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-          <Button variant="outline" onClick={() => setIsResetModalOpen(false)}>Cancelar</Button>
+          <Button variant="secondary" onClick={() => setIsResetModalOpen(false)}>Cancelar</Button>
           <Button variant="danger" onClick={handleReset} disabled={isResetting}>
             {isResetting ? "Zerando..." : "Sim, quero zerar tudo"}
           </Button>
@@ -292,7 +292,7 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
           A exclusão da conta é uma ação <strong>irreversível</strong>. Todos os seus dados, metas, questões criadas e histórico serão apagados dos nossos servidores. Tem certeza que deseja prosseguir?
         </p>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-          <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</Button>
+          <Button variant="secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</Button>
           <form action={async () => { await deleteAccountAction(); }}>
             <Button variant="danger" type="submit">Excluir Conta Definitivamente</Button>
           </form>

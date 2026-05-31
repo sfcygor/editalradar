@@ -404,7 +404,7 @@ export default function FlashcardsClient({ initialDecks, globalSubjects = [] }: 
         <form
           action={async (formData) => {
             setIsSubmitting(true);
-            const res = await createDeckAction(undefined, formData);
+            const res = await createDeckAction(formData);
             setIsSubmitting(false);
             if (res?.success) setIsAddingDeck(false);
           }}
@@ -420,7 +420,7 @@ export default function FlashcardsClient({ initialDecks, globalSubjects = [] }: 
           </div>
           <Input name="description" label="Descrição (Opcional)" placeholder="Breve descrição deste deck" />
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 8 }}>
-            <Button type="button" variant="outline" onClick={() => setIsAddingDeck(false)}>Cancelar</Button>
+            <Button type="button" variant="secondary" onClick={() => setIsAddingDeck(false)}>Cancelar</Button>
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Criando..." : "Criar Deck"}</Button>
           </div>
         </form>
@@ -452,7 +452,7 @@ export default function FlashcardsClient({ initialDecks, globalSubjects = [] }: 
             </div>
             <Input name="description" label="Descrição (Opcional)" defaultValue={editingDeck.description || ""} />
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 8 }}>
-              <Button type="button" variant="outline" onClick={() => setIsEditingDeck(false)}>Cancelar</Button>
+              <Button type="button" variant="secondary" onClick={() => setIsEditingDeck(false)}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Salvando..." : "Salvar Deck"}</Button>
             </div>
           </form>
