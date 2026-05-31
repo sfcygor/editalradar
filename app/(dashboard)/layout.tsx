@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-import { getSession } from "@/lib/session";
+import { getSession, deleteSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
@@ -31,6 +31,12 @@ export default async function DashboardLayout({
     .from(users)
     .where(eq(users.id, session.userId))
     .limit(1);
+
+  if (!dbUser) {
+    // Prevents ghost sessions (valid JWT but user deleted/missing from DB)
+    await deleteSession();
+    redirect("/login");
+  }
 
   return (
     <div className="app-layout">
