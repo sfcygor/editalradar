@@ -34,8 +34,8 @@ export default async function DashboardLayout({
 
   if (!dbUser) {
     // Prevents ghost sessions (valid JWT but user deleted/missing from DB)
-    await deleteSession();
-    redirect("/login");
+    // We must redirect to a Route Handler because Server Components cannot mutate cookies
+    redirect("/api/auth/logout");
   }
 
   return (
