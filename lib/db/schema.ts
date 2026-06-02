@@ -24,6 +24,11 @@ export const users = pgTable("users", {
   shareCode: text("share_code").notNull().unique(),
   avatarUrl: text("avatar_url"),
   concurso: text("concurso"), // e.g. "PM-SP 2026"
+  plan: text("plan").notNull().default("gratuito"),
+  billingCycle: text("billing_cycle"),
+  subscriptionStatus: text("subscription_status").notNull().default("active"),
+  subscriptionDate: timestamp("subscription_date"),
+  renewalDate: timestamp("renewal_date"),
   createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp("updated_at").$defaultFn(() => new Date()).notNull(),
 });

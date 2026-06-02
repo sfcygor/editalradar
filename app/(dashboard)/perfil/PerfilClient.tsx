@@ -10,7 +10,7 @@ import { Modal } from "@/components/ui/Modal";
 import { updateProfileInfoAction, changePasswordAction, resetProgressAction, deleteAccountAction, updateAvatarAction } from "@/lib/actions/profile";
 import { logoutAction } from "@/lib/actions/auth";
 
-export default function PerfilClient({ user }: { user: { name: string; email: string; avatarUrl?: string | null } }) {
+export default function PerfilClient({ user }: { user: { name: string; email: string; avatarUrl?: string | null; plan?: string | null; billingCycle?: string | null; subscriptionDate?: Date | null; renewalDate?: Date | null; } }) {
   const [showPassword, setShowPassword] = useState(false);
   const [saved, setSaved] = useState(false);
   const [passSaved, setPassSaved] = useState(false);
@@ -190,6 +190,59 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
 
         {/* Right: Settings */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* Subscription Info */}
+          <Card style={{ 
+            border: user.plan === "avancado" ? "1px solid var(--primary)" : "1px solid var(--border)", 
+            boxShadow: user.plan === "avancado" ? "0 8px 24px rgba(39,174,96,0.15)" : undefined,
+            position: "relative",
+            overflow: "hidden"
+          }}>
+            {user.plan === "avancado" && (
+              <div style={{ position: "absolute", top: 0, right: 0, padding: "4px 16px", background: "linear-gradient(135deg, var(--primary), var(--primary-light))", color: "white", fontSize: "0.75rem", fontWeight: 700, borderBottomLeftRadius: 16 }}>
+                Plano Premium
+              </div>
+            )}
+            <CardHeader>
+              <CardTitle>Sua Assinatura</CardTitle>
+            </CardHeader>
+            <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 4 }}>Plano Atual</div>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text)", textTransform: "capitalize" }}>
+                    {user.plan || "Gratuito"}
+                  </div>
+                </div>
+                <Badge variant={user.plan === "gratuito" ? "secondary" : "default"} style={user.plan !== "gratuito" ? { background: "var(--primary)" } : {}}>
+                  {user.plan === "gratuito" ? "Grátis" : "Ativo"}
+                </Badge>
+              </div>
+
+              {user.plan !== "gratuito" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 8, background: "rgba(0,0,0,0.02)", padding: 16, borderRadius: 12 }}>
+                  <div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Ciclo de Cobrança</div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)", textTransform: "capitalize" }}>{user.billingCycle || "Mensal"}</div>
+                  </div>
+                  {user.renewalDate && (
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Próxima Renovação</div>
+                      <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)" }}>{new Date(user.renewalDate).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <Button 
+                variant={user.plan === "gratuito" ? "primary" : "secondary"} 
+                style={{ width: "100%", marginTop: 8 }}
+                onClick={() => alert("Nossa integração de pagamentos será lançada em breve! Fique de olho nas novidades.")}
+              >
+                {user.plan === "gratuito" ? "Fazer Upgrade" : "Gerenciar Assinatura"}
+              </Button>
+            </div>
+          </Card>
           
           {/* Personal Info */}
           <Card>
