@@ -214,7 +214,7 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
                     {user.plan || "Gratuito"}
                   </div>
                 </div>
-                <Badge variant={user.plan === "gratuito" ? "secondary" : "default"} style={user.plan !== "gratuito" ? { background: "var(--primary)" } : {}}>
+                <Badge variant={user.plan === "gratuito" ? "gray" : "green"} style={user.plan !== "gratuito" ? { background: "var(--primary)" } : {}}>
                   {user.plan === "gratuito" ? "Grátis" : "Ativo"}
                 </Badge>
               </div>

@@ -19,7 +19,7 @@ export default function HeroSection() {
   const y = useTransform(scrollYProgress, [0, 0.5], [20, 0]);
 
   // Premium ease curve
-  const easePremium = [0.22, 1, 0.36, 1];
+  const easePremium: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
   return (
     <section ref={containerRef} style={{ position: "relative", paddingTop: 180, paddingBottom: 100, perspective: 1200 }}>
