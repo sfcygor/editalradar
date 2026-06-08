@@ -272,7 +272,7 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
                     {isLoadingStripe ? "Aguarde..." : "Gerenciar Assinatura"}
                   </Button>
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     style={{ width: "100%", color: "var(--text-muted)", borderColor: "var(--border)" }}
                     onClick={handleManage}
                     disabled={isLoadingStripe}
