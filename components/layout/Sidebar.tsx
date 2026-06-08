@@ -142,7 +142,7 @@ export default function Sidebar() {
                         <span className="nav-item-label whitespace-nowrap truncate">{item.label}</span>
                         <div className="flex items-center gap-2 ml-auto shrink-0 pl-2">
                           {item.premium && (
-                            <Crown size={15} className="text-yellow-500 drop-shadow-sm" strokeWidth={2.5} title="Recurso Premium" />
+                            <span title="Recurso Premium" style={{ display: "flex" }}><Crown size={15} className="text-yellow-500 drop-shadow-sm" strokeWidth={2.5} /></span>
                           )}
                           {item.badge && item.badge > 0 && (
                             <span className="nav-badge">{item.badge}</span>
