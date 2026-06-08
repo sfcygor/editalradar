@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, Camera, Mail, Lock, Download, RefreshCw, Trash2, Eye, EyeOff, CheckCircle2, LogOut } from "lucide-react";
+import { User, Camera, Mail, Lock, Download, RefreshCw, Trash2, Eye, EyeOff, CheckCircle2, LogOut, LifeBuoy } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { updateProfileInfoAction, changePasswordAction, resetProgressAction, deleteAccountAction, updateAvatarAction } from "@/lib/actions/profile";
 import { logoutAction } from "@/lib/actions/auth";
+import { useRouter } from "next/navigation";
 
-export default function PerfilClient({ user }: { user: { name: string; email: string; avatarUrl?: string | null; plan?: string | null; billingCycle?: string | null; subscriptionDate?: Date | null; renewalDate?: Date | null; } }) {
+export default function PerfilClient({ user }: { user: { name: string; email: string; avatarUrl?: string | null; plan?: string | null; billingCycle?: string | null; subscriptionDate?: Date | null; renewalDate?: Date | null; subscriptionStatus?: string | null; stripePriceId?: string | null; } }) {
   const [showPassword, setShowPassword] = useState(false);
   const [saved, setSaved] = useState(false);
   const [passSaved, setPassSaved] = useState(false);
@@ -18,7 +19,41 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
   const [isUploading, setIsUploading] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoadingStripe, setIsLoadingStripe] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const handleUpgrade = async () => {
+    setIsLoadingStripe(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || "price_dummy" })
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error || "Erro ao iniciar checkout");
+    } catch (e) {
+      alert("Erro ao iniciar checkout");
+    } finally {
+      setIsLoadingStripe(false);
+    }
+  };
+
+  const handleManage = async () => {
+    setIsLoadingStripe(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error || "Erro ao acessar portal");
+    } catch (e) {
+      alert("Erro ao acessar portal");
+    } finally {
+      setIsLoadingStripe(false);
+    }
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -192,57 +227,128 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* Subscription Info */}
-          <Card style={{ 
-            border: user.plan === "avancado" ? "1px solid var(--primary)" : "1px solid var(--border)", 
-            boxShadow: user.plan === "avancado" ? "0 8px 24px rgba(39,174,96,0.15)" : undefined,
-            position: "relative",
-            overflow: "hidden"
-          }}>
-            {user.plan === "avancado" && (
-              <div style={{ position: "absolute", top: 0, right: 0, padding: "4px 16px", background: "linear-gradient(135deg, var(--primary), var(--primary-light))", color: "white", fontSize: "0.75rem", fontWeight: 700, borderBottomLeftRadius: 16 }}>
-                Plano Premium
-              </div>
-            )}
-            <CardHeader>
-              <CardTitle>Sua Assinatura</CardTitle>
-            </CardHeader>
-            <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 4 }}>Plano Atual</div>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text)", textTransform: "capitalize" }}>
-                    {user.plan || "Gratuito"}
+          {user.subscriptionStatus === "trialing" ? (
+            <Card style={{ border: "1px solid var(--primary)", boxShadow: "0 8px 24px rgba(39,174,96,0.1)" }}>
+              <CardHeader>
+                <CardTitle style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--primary-dark)" }}>
+                  <span>🎁</span> Teste Gratuito Ativo
+                </CardTitle>
+              </CardHeader>
+              <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+                <p style={{ fontSize: "0.875rem", color: "var(--text)" }}>
+                  Você está utilizando o <strong>Plano {user.plan === 'avancado' ? 'Premium' : 'Padrão'}</strong> gratuitamente.
+                </p>
+                {(() => {
+                  const daysLeft = user.renewalDate ? Math.ceil((new Date(user.renewalDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
+                  return (
+                    <div style={{ fontSize: "0.875rem", color: "var(--text)" }}>
+                      Restam <strong>{daysLeft} {daysLeft === 1 ? 'dia' : 'dias'}</strong> para o fim do período de teste.
+                    </div>
+                  );
+                })()}
+                
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 8, background: "rgba(39,174,96,0.05)", padding: 16, borderRadius: 12 }}>
+                  <div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Primeira cobrança</div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)" }}>
+                      {user.renewalDate ? new Date(user.renewalDate).toLocaleDateString('pt-BR') : "N/A"}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Valor após o teste</div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)" }}>
+                      R$ {user.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_AVANCADO ? "69,90" : "39,90"}/mês
+                    </div>
                   </div>
                 </div>
-                <Badge variant={user.plan === "gratuito" ? "gray" : "green"} style={user.plan !== "gratuito" ? { background: "var(--primary)" } : {}}>
-                  {user.plan === "gratuito" ? "Grátis" : "Ativo"}
-                </Badge>
-              </div>
 
-              {user.plan !== "gratuito" && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 8, background: "rgba(0,0,0,0.02)", padding: 16, borderRadius: 12 }}>
-                  <div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Ciclo de Cobrança</div>
-                    <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)", textTransform: "capitalize" }}>{user.billingCycle || "Mensal"}</div>
-                  </div>
-                  {user.renewalDate && (
-                    <div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Próxima Renovação</div>
-                      <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)" }}>{new Date(user.renewalDate).toLocaleDateString('pt-BR')}</div>
-                    </div>
-                  )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                  <Button 
+                    variant="primary" 
+                    style={{ width: "100%" }}
+                    onClick={handleManage}
+                    disabled={isLoadingStripe}
+                  >
+                    {isLoadingStripe ? "Aguarde..." : "Gerenciar Assinatura"}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    style={{ width: "100%", color: "var(--text-muted)", borderColor: "var(--border)" }}
+                    onClick={handleManage}
+                    disabled={isLoadingStripe}
+                  >
+                    Cancelar Assinatura
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <Card style={{ 
+              border: user.plan === "avancado" ? "1px solid var(--primary)" : "1px solid var(--border)", 
+              boxShadow: user.plan === "avancado" ? "0 8px 24px rgba(39,174,96,0.15)" : undefined,
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              {user.plan === "avancado" && (
+                <div style={{ position: "absolute", top: 0, right: 0, padding: "4px 16px", background: "linear-gradient(135deg, var(--primary), var(--primary-light))", color: "white", fontSize: "0.75rem", fontWeight: 700, borderBottomLeftRadius: 16 }}>
+                  Plano Premium
                 </div>
               )}
+              <CardHeader>
+                <CardTitle>Sua Assinatura</CardTitle>
+              </CardHeader>
+              <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 4 }}>Plano Atual</div>
+                    <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text)", textTransform: "capitalize" }}>
+                      {user.plan || "Gratuito"}
+                    </div>
+                  </div>
+                  <Badge variant={user.plan === "gratuito" ? "gray" : "green"} style={user.plan !== "gratuito" ? { background: "var(--primary)" } : {}}>
+                    {user.plan === "gratuito" ? "Grátis" : "Ativo"}
+                  </Badge>
+                </div>
 
-              <Button 
-                variant={user.plan === "gratuito" ? "primary" : "secondary"} 
-                style={{ width: "100%", marginTop: 8 }}
-                onClick={() => alert("Nossa integração de pagamentos será lançada em breve! Fique de olho nas novidades.")}
-              >
-                {user.plan === "gratuito" ? "Fazer Upgrade" : "Gerenciar Assinatura"}
-              </Button>
-            </div>
-          </Card>
+                {user.plan !== "gratuito" && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 8, background: "rgba(0,0,0,0.02)", padding: 16, borderRadius: 12 }}>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Ciclo de Cobrança</div>
+                      <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)", textTransform: "capitalize" }}>{user.billingCycle || "Mensal"}</div>
+                    </div>
+                    {user.renewalDate && (
+                      <div>
+                        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 2 }}>Próxima Renovação</div>
+                        <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text)" }}>{new Date(user.renewalDate).toLocaleDateString('pt-BR')}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {user.plan === "gratuito" ? (
+                  <a href="/home#pricing" style={{ display: "block", width: "100%", textDecoration: "none" }}>
+                    <Button 
+                      type="button"
+                      variant="primary" 
+                      style={{ width: "100%", marginTop: 8 }}
+                      disabled={isLoadingStripe}
+                    >
+                      Fazer Upgrade
+                    </Button>
+                  </a>
+                ) : (
+                  <Button 
+                    variant="secondary" 
+                    style={{ width: "100%", marginTop: 8 }}
+                    onClick={handleManage}
+                    disabled={isLoadingStripe}
+                  >
+                    {isLoadingStripe ? "Aguarde..." : "Gerenciar Assinatura"}
+                  </Button>
+                )}
+              </div>
+            </Card>
+          )}
           
           {/* Personal Info */}
           <Card>
@@ -294,6 +400,26 @@ export default function PerfilClient({ user }: { user: { name: string; email: st
                 )}
               </div>
             </form>
+          </Card>
+
+          {/* Support */}
+          <Card style={{ border: "1px solid rgba(39,174,96,0.2)", background: "rgba(39,174,96,0.02)" }}>
+            <CardHeader>
+              <CardTitle style={{ color: "var(--primary-dark)", display: "flex", alignItems: "center", gap: 8 }}>
+                <LifeBuoy size={18} /> Central de Ajuda
+              </CardTitle>
+            </CardHeader>
+            <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                Encontrou algum problema ou tem sugestões para melhorar o EditalRadar? Fale conosco diretamente.
+              </p>
+              <Button 
+                variant="primary" 
+                onClick={() => window.location.href = "/suporte?from=" + encodeURIComponent(window.location.pathname)}
+              >
+                Reportar Problema
+              </Button>
+            </div>
           </Card>
 
           {/* Danger Zone */}

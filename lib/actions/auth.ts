@@ -27,6 +27,7 @@ const LoginSchema = z.object({
 });
 
 export type AuthState = {
+  success?: boolean;
   errors?: Record<string, string[]>;
   message?: string;
 } | undefined;
@@ -78,7 +79,8 @@ export async function registerAction(
   }
 
   await createSession({ userId: user.id, name: user.name, email: user.email });
-  redirect("/dashboard");
+  revalidatePath("/", "layout");
+  return { success: true };
 }
 
 // ─── Login ───────────────────────────────────────────────────
@@ -113,16 +115,15 @@ export async function loginAction(
     return { message: "Email ou senha incorretos" };
   }
 
-  console.log("LOGIN: Password matched for user:", user.email);
   try {
     await createSession({ userId: user.id, name: user.name, email: user.email });
-    console.log("LOGIN: Session created successfully!");
   } catch (error) {
     console.error("LOGIN: Failed to create session:", error);
+    return { message: "Erro ao criar sessão" };
   }
+
   revalidatePath("/", "layout");
-  console.log("LOGIN: Redirecting to /dashboard...");
-  redirect("/dashboard");
+  return { success: true };
 }
 
 // ─── Logout ──────────────────────────────────────────────────
@@ -130,5 +131,5 @@ export async function loginAction(
 export async function logoutAction() {
   await deleteSession();
   revalidatePath("/", "layout");
-  redirect("/login");
+  // Don't redirect, just let the UI update where it is
 }

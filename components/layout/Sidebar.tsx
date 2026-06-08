@@ -25,7 +25,9 @@ import {
   ChevronRight,
   Crosshair,
   Zap,
+  LifeBuoy,
   LogOut,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/lib/actions/auth";
@@ -35,6 +37,7 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   badge?: number;
+  premium?: boolean;
 }
 
 interface NavSection {
@@ -53,15 +56,15 @@ const navSections: NavSection[] = [
     label: "Estudo",
     items: [
       { href: "/questoes", label: "Questões", icon: FileQuestion },
-      { href: "/flashcards", label: "Flashcards", icon: BookOpen },
-      { href: "/revisoes", label: "Revisões", icon: RefreshCw },
-      { href: "/simulados", label: "Simulados", icon: PenSquare },
+      { href: "/flashcards", label: "Flashcards", icon: BookOpen, premium: true },
+      { href: "/revisoes", label: "Revisões", icon: RefreshCw, premium: true },
+      { href: "/simulados", label: "Simulados", icon: PenSquare, premium: true },
     ],
   },
   {
     label: "Organização",
     items: [
-      { href: "/edital", label: "Edital Tracker", icon: ClipboardList },
+      { href: "/edital", label: "Edital Tracker", icon: ClipboardList, premium: true },
       { href: "/banco-erros", label: "Banco de Erros", icon: AlertCircle },
       { href: "/cronometro", label: "Cronômetro", icon: Timer },
       { href: "/metas", label: "Metas", icon: Target },
@@ -72,7 +75,7 @@ const navSections: NavSection[] = [
     items: [
       { href: "/desempenho", label: "Desempenho", icon: TrendingUp },
       { href: "/heatmap", label: "Heatmap", icon: Calendar },
-      { href: "/estatisticas", label: "Estatísticas", icon: BarChart3 },
+      { href: "/estatisticas", label: "Estatísticas", icon: BarChart3, premium: true },
     ],
   },
   {
@@ -87,6 +90,7 @@ const navSections: NavSection[] = [
     items: [
       { href: "/busca", label: "Busca Global", icon: Search },
       { href: "/perfil", label: "Perfil", icon: User },
+      { href: "/suporte", label: "Suporte", icon: LifeBuoy },
     ],
   },
 ];
@@ -100,7 +104,7 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside className={cn("sidebar", collapsed && "collapsed")}>
         {/* Logo */}
-        <div className="sidebar-logo">
+        <Link href="/home" className="sidebar-logo">
           <div style={{ flexShrink: 0, width: 28, height: 28, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Image src="/logo.png" alt="EditalRadar Logo" width={28} height={28} style={{ objectFit: "contain" }} />
           </div>
@@ -109,7 +113,7 @@ export default function Sidebar() {
               Edital<span>Radar</span>
             </span>
           )}
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className="sidebar-nav">
@@ -134,12 +138,17 @@ export default function Sidebar() {
                   >
                     <Icon size={18} className="nav-item-icon" strokeWidth={1.8} />
                     {!collapsed && (
-                      <>
-                        <span className="nav-item-label">{item.label}</span>
-                        {item.badge && item.badge > 0 && (
-                          <span className="nav-badge">{item.badge}</span>
-                        )}
-                      </>
+                      <div className="flex items-center justify-between w-full flex-1 overflow-hidden ml-2">
+                        <span className="nav-item-label whitespace-nowrap truncate">{item.label}</span>
+                        <div className="flex items-center gap-2 ml-auto shrink-0 pl-2">
+                          {item.premium && (
+                            <Crown size={15} className="text-yellow-500 drop-shadow-sm" strokeWidth={2.5} title="Recurso Premium" />
+                          )}
+                          {item.badge && item.badge > 0 && (
+                            <span className="nav-badge">{item.badge}</span>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </Link>
                 );

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
+// ... [plans definition remains the same]
 const plans = [
   {
     name: "Gratuito",
@@ -34,7 +36,8 @@ const plans = [
     ],
     popular: true,
     badgeText: "Mais Popular",
-    buttonText: "Assinar Padrão",
+    buttonText: "Começar gratuitamente por 15 dias",
+    trialText: "15 dias grátis. Cancele quando quiser.",
     buttonVariant: "primary" as const,
   },
   {
@@ -54,8 +57,49 @@ const plans = [
   },
 ];
 
-export default function PricingSection() {
+export default function PricingSection({ user }: { user?: any }) {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [isLoadingStripe, setIsLoadingStripe] = useState(false);
+  const { openRegister } = useAuthModal();
+
+  useEffect(() => {
+    if (window.location.hash === "#pricing") {
+      setTimeout(() => {
+        const el = document.getElementById("pricing");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 500); // 500ms para garantir que animações terminaram
+    }
+  }, []);
+
+  const handleSubscribe = async (planName: string) => {
+    if (!user) {
+      openRegister();
+      return;
+    }
+    
+    setIsLoadingStripe(true);
+    
+    const priceId = planName === "Padrão" 
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PADRAO 
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_AVANCADO;
+
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId })
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error || "Erro ao iniciar checkout");
+    } catch (e) {
+      alert("Erro ao iniciar checkout");
+    } finally {
+      setIsLoadingStripe(false);
+    }
+  };
 
   return (
     <section id="pricing" style={{ padding: "80px 24px", position: "relative", zIndex: 5, background: "white" }}>
@@ -152,7 +196,7 @@ export default function PricingSection() {
                 {plan.description}
               </p>
 
-              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 24 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: (plan as any).trialText ? 8 : 24 }}>
                 <span style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text)" }}>R$</span>
                 <span style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", fontWeight: 800, color: "var(--text)", lineHeight: 1 }}>
                   {isAnnual ? plan.priceAnnual : plan.priceMonthly}
@@ -160,20 +204,50 @@ export default function PricingSection() {
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: 500 }}>/mês</span>
               </div>
 
-              <Link href="/dashboard" style={{ textDecoration: "none", marginBottom: 24 }}>
+              {(plan as any).trialText && (
+                <p style={{ fontSize: "0.85rem", color: "var(--primary)", fontWeight: 600, marginBottom: 24 }}>
+                  {(plan as any).trialText}
+                </p>
+              )}
+
+              {plan.name === "Padrão" || plan.name === "Avançado" ? (
                 <Button 
                   variant={plan.buttonVariant} 
+                  onClick={() => handleSubscribe(plan.name)}
+                  disabled={isLoadingStripe}
                   style={{ 
                     width: "100%", 
                     height: 40, 
                     fontSize: "0.9rem",
                     border: !plan.popular ? "1px solid var(--border)" : "none",
-                    boxShadow: plan.popular ? "0 4px 12px rgba(39,174,96,0.2)" : "none"
+                    boxShadow: plan.popular ? "0 4px 12px rgba(39,174,96,0.2)" : "none",
+                    marginBottom: 24
                   }}
                 >
-                  {plan.buttonText}
+                  {isLoadingStripe ? "Aguarde..." : plan.buttonText}
                 </Button>
-              </Link>
+              ) : (
+                <Button 
+                  variant={plan.buttonVariant} 
+                  onClick={user ? undefined : openRegister}
+                  style={{ 
+                    width: "100%", 
+                    height: 40, 
+                    fontSize: "0.9rem",
+                    border: !plan.popular ? "1px solid var(--border)" : "none",
+                    boxShadow: plan.popular ? "0 4px 12px rgba(39,174,96,0.2)" : "none",
+                    marginBottom: 24
+                  }}
+                >
+                  {user ? (
+                    <Link href="/dashboard" style={{ color: "inherit", textDecoration: "none", display: "block", width: "100%" }}>
+                      Acessar Grátis
+                    </Link>
+                  ) : (
+                    plan.buttonText
+                  )}
+                </Button>
+              )}
 
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
                 {plan.features.map((feature, idx) => (

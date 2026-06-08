@@ -38,14 +38,12 @@ export async function decrypt(
   token: string | undefined
 ): Promise<SessionPayload | null> {
   if (!token) {
-    console.log("DECRYPT: No token provided");
     return null;
   }
   try {
     const { payload } = await jwtVerify(token, getSecretKey(), {
       algorithms: ["HS256"],
     });
-    console.log("DECRYPT: Success for user:", payload.email);
     return payload as unknown as SessionPayload;
   } catch (err) {
     console.error("DECRYPT: Error verifying token:", err);

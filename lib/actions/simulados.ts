@@ -5,9 +5,24 @@ import { simulados, simuladoQuestions, questions } from "@/lib/db/schema";
 import { requireAuth } from "@/lib/session";
 import { eq, sql, desc, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getUserPlan } from "@/lib/permissions";
 
 export async function createSimuladoAction(formData: FormData) {
   const session = await requireAuth();
+
+  const plan = await getUserPlan(session.userId);
+  if (plan === "padrao") {
+    const userSimulados = await db()
+      .select({ id: simulados.id })
+      .from(simulados)
+      .where(eq(simulados.userId, session.userId));
+      
+    if (userSimulados.length >= 3) {
+      return { 
+        error: "Limite de 3 simulados atingido para o Plano Padrão. Faça upgrade para o Plano Avançado para criar Simulados Ilimitados." 
+      };
+    }
+  }
 
   const name = formData.get("name") as string;
   const totalQuestions = parseInt(formData.get("totalQuestions") as string, 10);

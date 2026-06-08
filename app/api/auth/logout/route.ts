@@ -3,5 +3,5 @@ import { redirect } from "next/navigation";
 
 export async function GET() {
   await deleteSession();
-  redirect("/login");
+  redirect("/home");
 }

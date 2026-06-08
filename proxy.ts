@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/lib/session";
 
-const PUBLIC_ROUTES = ["/", "/home", "/login", "/register", "/forgot-password"];
+const PUBLIC_ROUTES = ["/", "/home", "/login", "/register", "/forgot-password", "/termos", "/privacidade"];
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,8 +11,6 @@ export default async function middleware(request: NextRequest) {
   );
 
   const allCookies = request.cookies.getAll();
-  console.log(`PROXY [${pathname}]: Cookies received:`, allCookies.map(c => c.name));
-
   const token = request.cookies.get("session")?.value;
   const session = await decrypt(token);
 
@@ -25,7 +23,10 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isPublicRoute && session) {
+  const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+
+  if (isAuthRoute && session) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

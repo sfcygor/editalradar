@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Timer, User } from "lucide-react";
+import TrialBanner from "@/components/layout/TrialBanner";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -23,7 +24,19 @@ const pageTitles: Record<string, string> = {
   "/perfil": "Perfil",
 };
 
-export default function Header({ initials, avatarUrl }: { initials?: string, avatarUrl?: string | null }) {
+export default function Header({ 
+  initials, 
+  avatarUrl,
+  isTrialing,
+  daysLeft,
+  planName
+}: { 
+  initials?: string, 
+  avatarUrl?: string | null,
+  isTrialing?: boolean,
+  daysLeft?: number,
+  planName?: string
+}) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
   const rootPath = "/" + (segments[0] || "dashboard");
@@ -64,12 +77,15 @@ export default function Header({ initials, avatarUrl }: { initials?: string, ava
 
       {/* Right side */}
       <div className="header-right">
+        {/* Trial Banner */}
+        {isTrialing && daysLeft !== undefined && daysLeft >= 0 && planName && (
+          <TrialBanner daysLeft={daysLeft} planName={planName} />
+        )}
+
         {/* Timer quick access */}
         <Link href="/cronometro" className="header-icon-btn" title="Cronômetro" id="header-timer-btn">
           <Timer size={18} />
         </Link>
-
-
 
         {/* Profile */}
         <Link href="/perfil" className="avatar-btn" title="Meu Perfil" id="header-profile-btn" style={{ padding: avatarUrl ? 0 : undefined, overflow: "hidden" }}>

@@ -29,6 +29,10 @@ export const users = pgTable("users", {
   subscriptionStatus: text("subscription_status").notNull().default("active"),
   subscriptionDate: timestamp("subscription_date"),
   renewalDate: timestamp("renewal_date"),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  stripePriceId: text("stripe_price_id"),
+  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
   createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp("updated_at").$defaultFn(() => new Date()).notNull(),
 });

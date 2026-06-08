@@ -7,35 +7,31 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area,
 } from "recharts";
 
-const stats = [
-  { label: "Tempo Total Estudado", value: "131h 20min", icon: Clock, color: "blue", change: "+12h esta semana" },
-  { label: "Questões Resolvidas", value: "2.180", icon: FileQuestion, color: "green", change: "+89 hoje" },
-  { label: "Taxa de Acertos", value: "74%", icon: Target, color: "yellow", change: "+3% este mês" },
-  { label: "Flashcards Revisados", value: "1.650", icon: BookOpen, color: "purple", change: "+28 hoje" },
-  { label: "Dias Estudando", value: "248", icon: Calendar, color: "blue", change: "desde jan/2026" },
-  { label: "Maior Sequência", value: "63 dias", icon: Flame, color: "red", change: "recorde pessoal" },
-];
+export default function EstatisticasClient({ initialData }: { initialData: any }) {
+  if (!initialData) {
+    return <div className="page-container animate-fade-in"><p>Sem dados suficientes.</p></div>;
+  }
 
-const monthlyData = [
-  { month: "Jan", questions: 180, hours: 22, flashcards: 120 },
-  { month: "Fev", questions: 240, hours: 28, flashcards: 180 },
-  { month: "Mar", questions: 310, hours: 35, flashcards: 220 },
-  { month: "Abr", questions: 280, hours: 30, flashcards: 200 },
-  { month: "Mai", questions: 420, hours: 42, flashcards: 310 },
-  { month: "Jun", questions: 510, hours: 48, flashcards: 380 },
-];
+  const {
+    totalStudyTime,
+    totalQuestions,
+    accuracyRate,
+    totalFlashcards,
+    daysStudying,
+    streak,
+    userSince,
+    monthlyData,
+    milestones,
+  } = initialData;
 
-const milestones = [
-  { label: "Primeira questão respondida", date: "Jan 2026", done: true },
-  { label: "100 questões resolvidas", date: "Fev 2026", done: true },
-  { label: "Sequência de 7 dias", date: "Mar 2026", done: true },
-  { label: "500 questões resolvidas", date: "Abr 2026", done: true },
-  { label: "1.000 flashcards revisados", date: "Mai 2026", done: true },
-  { label: "Sequência de 30 dias", date: "Jun 2026", done: false },
-  { label: "2.500 questões resolvidas", date: "—", done: false },
-];
-
-export default function EstatisticasClient() {
+  const stats = [
+    { label: "Tempo Total Estudado", value: totalStudyTime || "0min", icon: Clock, color: "blue", change: "acumulado" },
+    { label: "Questões Resolvidas", value: totalQuestions?.toString() || "0", icon: FileQuestion, color: "green", change: "acumulado" },
+    { label: "Taxa de Acertos", value: accuracyRate || "0%", icon: Target, color: "yellow", change: "global" },
+    { label: "Flashcards Revisados", value: totalFlashcards?.toString() || "0", icon: BookOpen, color: "purple", change: "acumulado" },
+    { label: "Dias Estudando", value: daysStudying?.toString() || "0", icon: Calendar, color: "blue", change: userSince ? `desde ${userSince}` : "" },
+    { label: "Maior Sequência", value: `${streak || 0} dias`, icon: Flame, color: "red", change: "atual" },
+  ];
   return (
     <div className="page-container animate-fade-in">
       {/* Stats Grid */}

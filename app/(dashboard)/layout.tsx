@@ -22,20 +22,29 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
 
-  if (!session) {
-    redirect("/login");
+  if (!session || !session.userId) {
+    redirect("/home?login=true");
   }
 
   const [dbUser] = await db()
-    .select({ avatarUrl: users.avatarUrl })
+    .select({ 
+      avatarUrl: users.avatarUrl,
+      subscriptionStatus: users.subscriptionStatus,
+      renewalDate: users.renewalDate,
+      plan: users.plan
+    })
     .from(users)
     .where(eq(users.id, session.userId))
     .limit(1);
 
   if (!dbUser) {
-    // Prevents ghost sessions (valid JWT but user deleted/missing from DB)
-    // We must redirect to a Route Handler because Server Components cannot mutate cookies
     redirect("/api/auth/logout");
+  }
+
+  const isTrialing = dbUser.subscriptionStatus === "trialing";
+  let daysLeft = 0;
+  if (isTrialing && dbUser.renewalDate) {
+    daysLeft = Math.ceil((new Date(dbUser.renewalDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   }
 
   return (
@@ -44,7 +53,10 @@ export default async function DashboardLayout({
       <div className="main-content">
         <Header 
           initials={session.name ? session.name.substring(0, 2).toUpperCase() : "US"} 
-          avatarUrl={dbUser?.avatarUrl}
+          avatarUrl={dbUser.avatarUrl}
+          isTrialing={isTrialing}
+          daysLeft={daysLeft}
+          planName={dbUser.plan || "Padrão"}
         />
         <main>{children}</main>
       </div>
