@@ -97,7 +97,7 @@ export default function EstatisticasClient({ initialData }: { initialData: any }
           <Trophy size={18} color="var(--accent-dark)" />
         </CardHeader>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {milestones.map((m, i) => (
+          {milestones.map((m: any, i: number) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <div
                 style={{
